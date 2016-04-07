@@ -59,7 +59,7 @@ while(my $line = <READER>)
 				{
 					print "\n$check is not capitalized it should be: " . ucfirst($check) . "\n";
 					$right=ucfirst($check);
-					$line=~ s/\. $check\b/\. $right/;
+					$line=~ s/([.?!]) $check/$1 $right/;
 					$capital=0;
 				}
 				if(/[.?!]$/)			#Checks for characters that require a capital letter afterwards
