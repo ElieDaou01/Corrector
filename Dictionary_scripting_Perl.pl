@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #THINGS TO STILL DO:
-#SORT 5 SUGGESTIONS.
+#TAKE ARGUMENT FROM USER,ADD FEATURES, POLISH CODE, OPTIMIZE 
+#PLEASE REMEMBER THAT DICTIONARY FILE SHOULD BE PASSED AS ARGUMENT WHEN RUNNING SCRIPT
+
 use strict;
 use warnings;
 use Text::LevenshteinXS qw(distance);		#library used to calculate levenstein distance (requires C compiler) CPAN link:http://search.cpan.org/~jgoldberg/Text-LevenshteinXS-0.03/LevenshteinXS.pm
@@ -14,9 +16,9 @@ while (my $line = <READER>)		#Inserts dictionary file into hash
 	$hasher{$line}=1;
 }
 close READER;
-open( READER,$ARGV[0] ) || die;		#Takes input file from command argument
+open( READER,$ARGV[0] ) || open (READER, input());				#Takes input file from command argument or from user 
 print "Please name output file name(Including file extension): \n";	#user inputed output file name as well as extension
-$filen= <STDIN>;
+my $filen= <STDIN>;
 chomp $filen;
 open(WRITER,">$filen") || die "Output file writer failed" ;	#output file writer
 my $mind;
@@ -86,7 +88,7 @@ while(my $line = <READER>)
 						my $temp=distance($check,$key);
 						if($temp<$nearest[4][0])
 							{
-								$nearest[4]=[$temp,$key];
+								$nearest[4]=[$temp,$key];					#
 								@nearest= sort { $a->[0] <=> $b->[0] } @nearest;		#sort array based on distance
 							}
 					}
@@ -112,3 +114,19 @@ close WRITER;
 close READER;
 my $time = gettimeofday()-$start;
 print "\nCode took $time ms to run\n";
+
+#user file input sub 
+sub input
+
+{
+	print "Please enter input file name or filepath: \n";
+	my $filen = <STDIN>;
+	chomp $filen;
+	while (!(-e $filen))
+	{
+		print "File does not exist please enter again: \n";
+		$filen = <STDIN>;
+		chomp $filen;
+	}
+	return $filen;
+}
