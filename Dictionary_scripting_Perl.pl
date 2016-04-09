@@ -57,7 +57,7 @@ while(my $line = <READER>)
 		}
 		else
 		{
-				$capital=0 if(/^[A-Z]/ and $capital);	
+				$capital=0 if(/^[A-Z]/ and $capital)		;	
 				if(!(/^[A-Z]/) and $capital)		#Capitalization check
 				{
 					print "\n$check is not capitalized it should be: " . ucfirst($check) . "\n";
@@ -113,7 +113,7 @@ while(my $line = <READER>)
 close WRITER;
 close READER;
 my $time = gettimeofday()-$start;
-print "\nCode took $time ms to run\n";
+print "\nCode took $time s to run\n";
 
 #user file input sub 
 sub input
