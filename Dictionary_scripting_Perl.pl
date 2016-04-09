@@ -15,13 +15,14 @@ while (my $line = <READER>)		#Inserts dictionary file into hash
 }
 close READER;
 open( READER,$ARGV[0] ) || die;		#Takes input file from command argument
-open(WRITER,">output.txt") || die;	#output file is called output.txt
+print "Please name output file name(Including file extension): \n";	#user inputed output file name as well as extension
+$filen= <STDIN>;
+chomp $filen;
+open(WRITER,">$filen") || die "Output file writer failed" ;	#output file writer
 my $mind;
 my $right;
 my $capital=0;
 my $wrongcap=0;
-my @emptyarr = (2147483647,"");
-my $emptyref =\ @emptyarr;
 while(my $line = <READER>)
 {
 	chomp $line;
