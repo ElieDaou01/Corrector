@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #THINGS TO STILL DO:
-#TAKE ARGUMENT FROM USER,ADD FEATURES, POLISH CODE, OPTIMIZE 
-#PLEASE REMEMBER THAT DICTIONARY FILE SHOULD BE PASSED AS ARGUMENT WHEN RUNNING SCRIPT
+#ADD FEATURES, POLISH CODE, OPTIMIZE 
+#PLEASE REMEMBER THAT DICTIONARY FILE SHOULD BE PRESENT IN CURRENT DIRECTORY WHEN RUNNING SCRIPT
 
 use strict;
 use warnings;
@@ -16,8 +16,15 @@ while (my $line = <READER>)		#Inserts dictionary file into hash
 	$hasher{$line}=1;
 }
 close READER;
-open( READER,$ARGV[0] ) || open (READER, input());				#Takes input file from command argument or from user 
-print "Please name output file name(Including file extension): \n";	#user inputed output file name as well as extension
+if(defined($ARGV[0]))
+{
+	open( READER,$ARGV[0]);
+}
+else
+{
+	open (READER, input());				#Takes input file from command argument or from user 
+}
+print "Please name output file name(Including file extension): \n";		#user inputed output file name as well as extension
 my $filen= <STDIN>;
 chomp $filen;
 open(WRITER,">$filen") || die "Output file writer failed" ;	#output file writer
@@ -49,7 +56,7 @@ while(my $line = <READER>)
 			$_= substr $check,1;
 			$check = substr $check,1;
 		}
-		if($check eq 'i')
+		if($check eq 'i')	#Check for i capitalization, place independent
 		{
 			print "\n$check is not capitalized it should be: " . ucfirst($check) . "\n";
 			$line=~ s/\b$check\b/I/;
@@ -57,7 +64,7 @@ while(my $line = <READER>)
 		}
 		else
 		{
-				$capital=0 if(/^[A-Z]/ and $capital)		;	
+				$capital=0 if(/^[A-Z]/ and $capital);	
 				if(!(/^[A-Z]/) and $capital)		#Capitalization check
 				{
 					print "\n$check is not capitalized it should be: " . ucfirst($check) . "\n";
@@ -80,7 +87,9 @@ while(my $line = <READER>)
 				$check = lc $check;
 				if(!(exists $hasher{$check}))
 				{
-					@nearest= ([2147483647,""],[2147483647,""],[2147483647,""],[2147483647,""],[2147483647,""]); 	# 2D array containing nearest 5 words and their respective distance
+					my @length= split(//, $check); 		#In order to get word size
+					my $wordL=$#length;
+					@nearest= ([$wordL,"No Suggestion found"],[$wordL,"No Suggestion found"],[$wordL,"No Suggestion found"],[$wordL,"No Suggestion found"],[$wordL,"No Suggestion found"]); 	# 2D array containing nearest 5 words and their respective distance, initialzed to word length. 
 					print "\nWRONG WORD FOUND: $check\n";
 					print "Possible replacements: (Best to Worst)\n";
 					foreach my $key (keys %hasher)
@@ -88,23 +97,26 @@ while(my $line = <READER>)
 						my $temp=distance($check,$key);
 						if($temp<$nearest[4][0])
 							{
-								$nearest[4]=[$temp,$key];					#
-								@nearest= sort { $a->[0] <=> $b->[0] } @nearest;		#sort array based on distance
+								$nearest[4]=[$temp,$key];					
+								@nearest= sort { $a->[0] <=> $b->[0] } @nearest;		#sort array based on distance using value of nested array
 							}
 					}
 					foreach my $i (0..4)
 					{
 						print $nearest[$i]->[1] . "\n";
 					}
-					$right=$nearest[0][1];
-					if($wrongcap)			#Checks for capitalization if the word is wrong (for output file)
-					{	
-						$right=ucfirst($right);
-						$check=ucfirst($check);
-						$wrongcap=0;
+					if($nearest[0][1] ne "No Suggestion found")
+					{
+						$right=$nearest[0][1];
+						if($wrongcap)			#Checks for capitalization if the word is wrong (for output file)
+						{	
+							$right=ucfirst($right);
+							$check=ucfirst($check);
+							$wrongcap=0;
+						}
+						$wrongcap=1 if($capital);
+						$line=~ s/\b$check\b/$right/g;
 					}
-					$wrongcap=1 if($capital);
-					$line=~ s/\b$check\b/$right/g;
 				}
 		}	
 	}
@@ -122,11 +134,18 @@ sub input
 	print "Please enter input file name or filepath: \n";
 	my $filen = <STDIN>;
 	chomp $filen;
-	while (!(-e $filen))
+	while (!(-e $filen)) 		#checks if file exists
 	{
 		print "File does not exist please enter again: \n";
 		$filen = <STDIN>;
 		chomp $filen;
 	}
+	while (!(-r $filen)) 		#checks if file readable
+	{
+		print "File is not readable please enter again: \n";
+		$filen = <STDIN>;
+		chomp $filen;
+	}
+		
 	return $filen;
 }
